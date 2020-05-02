@@ -1,5 +1,6 @@
 const LivroDao = require('../infra/livro-dao');
 const db = require('../../config/database');
+const { check, validationResult } = require('express-validator/check');
 
 module.exports = (app) => {
     app.get('/', (req, res) => {
@@ -16,12 +17,25 @@ module.exports = (app) => {
     });
 
     app.get('/livros/form', (req, res) => {
-        res.marko(require('../views/livros/form/formulario.marko'), {livro: {}});
+        res.marko(require('../views/livros/form/formulario.marko'), { livro: {} });
     });
 
-    app.post('/livros', (req, res) => {
+    app.post('/livros', [
+        check('titulo').isLength({ min: 5 }).withMessage('O titulo precisa ter no mínimo 5 caracteres.'),
+        check('preco').isCurrency().withMessage('O preço precisa ter uma valor monetário válido.')
+    ], (req, res) => {
+        const livro = req.body;
         const livroDao = new LivroDao(db);
-        livroDao.adiciona(req.body)
+
+        const erros = validationResult(req);
+        if (!erros.isEmpty()) {
+            return res.status(400).marko(
+                require('../views/livros/form/formulario.marko'),
+                { livro, errosValidacao: erros.array() }
+            );
+        }
+
+        livroDao.adiciona(livro)
             .then(res.redirect('/livros'))
             .catch(err => console.log(err));
     });
@@ -47,9 +61,6 @@ module.exports = (app) => {
         const livroDao = new LivroDao(db);
         livroDao.remove(id)
             .then(() => res.status(200).end())
-            .catch(err => {
-                console.log(err);
-                res.status(500).end();
-            });
+            .catch(err => console.log(err));
     });
 }
