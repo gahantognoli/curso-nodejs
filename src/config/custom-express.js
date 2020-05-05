@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override')
 
 const app = express();
+const templates = require('../app/views/templates');
 
 //Middlewares
 app.use('/estatico', express.static('src/app/public'));
@@ -24,13 +25,13 @@ routes(app);
 //Tratamento de erros
 app.use(function(req, res, next){
     return res.status(404).marko(
-        require('../app/views/base/erros/404.marko')
+        templates.base.erro404
     );
 });
 
 app.use(function(erro, req, res, next){
     return res.status(500).marko(
-        require('../app/views/base/erros/500.marko')
+        templates.base.erro500
     );
 });
 
