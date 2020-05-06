@@ -10,7 +10,8 @@ class LivroController {
             lista: '/livros',
             cadastro: '/livros/form',
             edicao: '/livros/form/:id',
-            delecao: '/livros/:id'
+            delecao: '/livros/:id',
+            autenticadas: '/livros*'
         };
     }
 
